@@ -5,7 +5,6 @@ MAINTAINER David Nunez <arizonatribe@gmail.com>
 RUN yum install -y --setopt=tsflags=nodocs \
     bind-utils \
     hostname \
-    mariadb-server \
     psmisc \
     pwgen
 
@@ -13,6 +12,9 @@ RUN yum -y clean all
 
 # Scripts in this directory overlay the container's natural directory structure
 COPY docker /
+
+RUN mkdir /var/log/mariadb
+RUN yum install MariaDB-server -y
 
 RUN /opt/bin/permissions.sh /var/lib/mysql/  \
     && /opt/bin/permissions.sh /var/log/mariadb/ \
