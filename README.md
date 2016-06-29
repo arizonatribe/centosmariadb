@@ -46,11 +46,46 @@ them at the end of the `docker run` command listed above, for example:
 docker run --name=centosmariadb -d --volumes-from=mariadb-data -e MYSQL_ROOT_PASSWORD=<password> centosmariadb mysqld_safe --log-error=/var/log/mysql.err --pid-file=/var/run/mysqld.pid
 ```
 These options are more easily committed to a `docker-compose.yml` file if they become this lengthy.
+The settings from the previous commands would appear in a `docker-compose.yml` file like this:
+
+```yaml
+version: '2'
+services:
+  mariadb-data:
+    build: ./
+    image: arizonatribe/centosmariadb:latest
+    volumes:
+      - /var/lib/mysql
+    entrypoint: /bin/bash
+  mariadb:
+    build: ./
+    image: arizonatribe/centosmariadb:latest
+    container_name: centosmariadb
+    volumes_from:
+      - mariadb-data
+    environment:
+      - MYSQL_ROOT_PASSWORD=<password>
+```
+
+This file (if placed in the same directory as the Dockerfile, as indicated by the `build: ./` line)
+would be executed from the command line from the project root directory:
+
+```bash
+docker-compose up --build
+```
+
+This builds the image(s) first, and then instantiates the two containers together. If you wish to
+separate building and running into different commands, you can do so too:
+
+```bash
+docker-compose build
+docker-compose up
+```
 
 # Environment variables
 
 * __MYSQL_ROOT_PASSWORD__ - The (required) root user password.
-* * __MYSQL_ALLOW_EMPTY_PASSWORD__ - An boolean value that must be set to `true` if the root password is not being provided to the container. 
-* * __MYSQL_DATABASE__ - A database to create.
-* * __MYSQL_USER__ - A non-root user to set up (must also include a password).
-* * __MYSQL_PASSWORD__ - A password for the non-root user being set up.
+* __MYSQL_ALLOW_EMPTY_PASSWORD__ - An boolean value that must be set to `true` if the root password is not being provided to the container. 
+* __MYSQL_DATABASE__ - A database to create.
+* __MYSQL_USER__ - A non-root user to set up (must also include a password).
+* __MYSQL_PASSWORD__ - A password for the non-root user being set up.
