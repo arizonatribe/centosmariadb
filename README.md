@@ -43,7 +43,7 @@ pass a command to override the default "optionless" `mysqld_safe` command, placi
 them at the end of the `docker run` command listed above, for example:
 
 ```bash
-docker run --name=centosmariadb -d --volumes-from=mariadb-data -e MYSQL_ROOT_PASSWORD=<password> centosmariadb mysqld_safe --log-error=/var/log/mysql.err --pid-file=/var/run/mysqld.pid
+docker run --name=centosmariadb -d --build-arg MARIA_VERSION=10.1.13 --volumes-from=mariadb-data -e MYSQL_ROOT_PASSWORD=<password> centosmariadb mysqld_safe --log-error=/var/log/mysql.err --pid-file=/var/run/mysqld.pid
 ```
 These options are more easily committed to a `docker-compose.yml` file if they become this lengthy.
 The settings from the previous commands would appear in a `docker-compose.yml` file like this:
@@ -52,13 +52,19 @@ The settings from the previous commands would appear in a `docker-compose.yml` f
 version: '2'
 services:
   mariadb-data:
-    build: ./
+    build: 
+      context: ./
+      args:
+        - MARIA_VERSION=10.1.13
     image: arizonatribe/centosmariadb:latest
     volumes:
       - /var/lib/mysql
     entrypoint: /bin/bash
   mariadb:
-    build: ./
+    build: 
+      context: ./
+      args:
+        - MARIA_VERSION=10.1.13
     image: arizonatribe/centosmariadb:latest
     container_name: centosmariadb
     volumes_from:
@@ -89,3 +95,4 @@ docker-compose up
 * __MYSQL_DATABASE__ - A database to create.
 * __MYSQL_USER__ - A non-root user to set up (must also include a password).
 * __MYSQL_PASSWORD__ - A password for the non-root user being set up.
+* __MARIA_VERSION__ - When _building_ the image, you can set a version corresponding with those found at http://yum.mariadb.org (defaults to 10.1)
